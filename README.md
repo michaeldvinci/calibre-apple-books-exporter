@@ -4,9 +4,9 @@ This plugin allows you to send ebooks from Calibre directly to Apple Books on ma
 
 ## Installation
 
-1. Install the plugin from `apple_books_plugin_fixed.zip`.
+1. Install the plugin from `apple_books_exporter.zip`.
 2. In Calibre, go to Preferences > Plugins > Load plugin from file.
-3. Select `apple_books_plugin_fixed.zip` and install.
+3. Select `apple_books_exporter.zip` and install.
 
 ## Usage
 
