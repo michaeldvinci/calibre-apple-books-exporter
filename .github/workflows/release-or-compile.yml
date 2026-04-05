@@ -1,0 +1,50 @@
+name: Compile and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  compile:
+    name: Compile Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Compile plugin files
+        run: python -m py_compile ui.py
+      - name: Package plugin for tag builds
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          rm -f apple_books_plugin_fixed.zip
+          zip -r apple_books_plugin_fixed.zip __init__.py ui.py README.md plugin-import-name-book_bridge.txt
+
+  release:
+    name: Create GitHub Release
+    needs: compile
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Package plugin
+        run: |
+          rm -f apple_books_plugin_fixed.zip
+          zip -r apple_books_plugin_fixed.zip __init__.py ui.py README.md plugin-import-name-book_bridge.txt
+      - name: Create GitHub release and upload asset
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: Release created for tag ${{ github.ref_name }}.
+          draft: false
+          prerelease: false
+          files: apple_books_plugin_fixed.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
