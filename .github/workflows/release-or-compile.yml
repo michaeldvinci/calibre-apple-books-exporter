@@ -21,8 +21,8 @@ jobs:
       - name: Package plugin for tag builds
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          rm -f apple_books_plugin_fixed.zip
-          zip -r apple_books_plugin_fixed.zip __init__.py ui.py README.md plugin-import-name-book_bridge.txt
+          rm -f apple_books_exporter.zip
+          zip -r apple_books_exporter.zip __init__.py ui.py README.md plugin-import-name-book_bridge.txt
 
   release:
     name: Create GitHub Release
@@ -34,17 +34,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - name: Extract version from tag
+        id: tag_version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
       - name: Package plugin
         run: |
-          rm -f apple_books_plugin_fixed.zip
-          zip -r apple_books_plugin_fixed.zip __init__.py ui.py README.md plugin-import-name-book_bridge.txt
+          rm -f apple_books_exporter.zip
+          zip -r apple_books_exporter.zip __init__.py ui.py README.md plugin-import-name-book_bridge.txt
       - name: Create GitHub release and upload asset
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          name: Release ${{ steps.tag_version.outputs.version }}
           body: Release created for tag ${{ github.ref_name }}.
           draft: false
           prerelease: false
-          files: apple_books_plugin_fixed.zip
+          artifacts: apple_books_exporter.zip
           token: ${{ secrets.GITHUB_TOKEN }}
