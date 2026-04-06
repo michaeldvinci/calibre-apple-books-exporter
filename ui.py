@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from qt.core import QToolButton, QInputDialog
+from qt.core import QToolButton, QInputDialog, QMessageBox
 from calibre.gui2.actions import InterfaceAction
 import platform
 import tempfile
@@ -90,16 +90,22 @@ class AppleBooksGuiAction(InterfaceAction):
 
             chosen_format = choices[0]
             if len(choices) > 1:
-                chosen_format, ok = QInputDialog.getItem(
-                    gui,
-                    'Select format',
-                    f'Select the format to send for "{mi.title}":',
-                    choices,
-                    0,
-                    False
-                )
-                if not ok:
+                msg_box = QMessageBox(gui)
+                msg_box.setWindowTitle('Select format')
+                msg_box.setText(f'Select the format to send for "{mi.title}":')
+                msg_box.setStandardButtons(QMessageBox.StandardButton.Cancel)
+                buttons = []
+                for choice in choices:
+                    button = msg_box.addButton(choice, QMessageBox.ButtonRole.AcceptRole)
+                    buttons.append(button)
+                if 'EPUB' in choices:
+                    msg_box.setDefaultButton(buttons[choices.index('EPUB')])
+                else:
+                    msg_box.setDefaultButton(buttons[0])
+                result = msg_box.exec()
+                if result == QMessageBox.StandardButton.Cancel:
                     continue
+                chosen_format = msg_box.clickedButton().text()
 
             temp_file = None
             converted = False
